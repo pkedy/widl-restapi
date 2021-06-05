@@ -294,7 +294,9 @@ export class OpenAPIV2Visitor extends BaseVisitor {
     oper.annotation("path", (a) => {
       path += a.convert<PathDirective>().value;
     });
-    this.path = path;
+    if (path == "") {
+      return;
+    }
 
     let pathItem = this.root.paths[path];
     if (!pathItem) {
@@ -310,8 +312,12 @@ export class OpenAPIV2Visitor extends BaseVisitor {
         });
       }
     );
-    this.method = method;
+    if (method == "") {
+      return;
+    }
 
+    this.path = path;
+    this.method = method;
     this.operation = {
       operationId: oper.name.value,
       summary: undefined,
@@ -327,7 +333,7 @@ export class OpenAPIV2Visitor extends BaseVisitor {
   }
 
   visitParameter(context: Context): void {
-    if (!shouldIncludeHandler(context)) {
+    if (!this.operation || !shouldIncludeHandler(context)) {
       return;
     }
     if (!this.operation!.parameters) {
@@ -362,8 +368,7 @@ export class OpenAPIV2Visitor extends BaseVisitor {
         }
         if (!typeFormat) {
           throw Error(
-            `path parameter "${
-              param.name.value
+            `path parameter "${param.name.value
             }" must be a required type: found "${param.type.getKind()}"`
           );
         }
@@ -376,8 +381,7 @@ export class OpenAPIV2Visitor extends BaseVisitor {
       case ParameterIn.BODY:
         if (!param.type.isKind(Kind.Named)) {
           throw Error(
-            `body parameter "${
-              param.name.value
+            `body parameter "${param.name.value
             }" must be a required type: found "${param.type.getKind()}"`
           );
         }
@@ -433,9 +437,11 @@ export class OpenAPIV2Visitor extends BaseVisitor {
           }
         }
 
-        p.schema = {
-          $ref: "#/definitions/" + type.name.value,
-        };
+        if (type) {
+          p.schema = {
+            $ref: "#/definitions/" + type.name.value,
+          };
+        }
         this.operation!.parameters.push(p);
         return;
 
@@ -451,8 +457,7 @@ export class OpenAPIV2Visitor extends BaseVisitor {
             }
             if (!typeFormat) {
               throw Error(
-                `query parameter "${
-                  param.name.value
+                `query parameter "${param.name.value
                 }" must be a built-type: found "${type.getKind()}"`
               );
             }
@@ -507,7 +512,7 @@ export class OpenAPIV2Visitor extends BaseVisitor {
   }
 
   visitOperationAfter(context: Context): void {
-    if (!shouldIncludeHandler(context)) {
+    if (!this.operation || !shouldIncludeHandler(context)) {
       return;
     }
     const oper = context.operation!;
@@ -554,6 +559,7 @@ export class OpenAPIV2Visitor extends BaseVisitor {
     }
 
     this.path = "";
+    this.operation = undefined;
   }
 
   visitType(context: Context): void {
