@@ -1,4 +1,5 @@
 import { parseType } from "@wapc/widl";
+import { shouldIncludeHandler } from "@wapc/widl-codegen/utils";
 import {
   Context,
   Writer,
@@ -273,6 +274,9 @@ export class OpenAPIV2Visitor extends BaseVisitor {
   }
 
   visitOperationBefore(context: Context): void {
+    if (!shouldIncludeHandler(context)) {
+      return;
+    }
     const inter = context.interface;
     const role = context.role;
     const oper = context.operation!;
@@ -323,6 +327,9 @@ export class OpenAPIV2Visitor extends BaseVisitor {
   }
 
   visitParameter(context: Context): void {
+    if (!shouldIncludeHandler(context)) {
+      return;
+    }
     if (!this.operation!.parameters) {
       this.operation!.parameters = [];
     }
@@ -500,6 +507,9 @@ export class OpenAPIV2Visitor extends BaseVisitor {
   }
 
   visitOperationAfter(context: Context): void {
+    if (!shouldIncludeHandler(context)) {
+      return;
+    }
     const oper = context.operation!;
     const responses: Responses = {};
 

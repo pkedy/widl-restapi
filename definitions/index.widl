@@ -46,10 +46,10 @@ directive @response(
 require @path on SELF | INTERFACE | ROLE | NAMESPACE
 
 enum StatusCode @novisit {
-  OK = 200 "OK"
-  CREATED = 201 "Created"
-  NOT_FOUND = 400 "Not Found"
-  DEFAULT = 999 "Default"
+  OK = 200 as "OK"
+  CREATED = 201 as "Created"
+  NOT_FOUND = 400 as "Not Found"
+  DEFAULT = 999 as "Default"
 }
 
 directive @externalDocs(
